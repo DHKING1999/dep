@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Word Checker</h1>
+    <input type="file" id="fileInput" accept=".txt">
+    <button onclick="checkWords()">Check Words</button>
+    <p id="result"></p>
+    <a id="downloadLink" style="display: none" download="non_duplicate_words.txt">Download Non-Duplicate Words</a>
+
+    <script>
+        function checkWords() {
+            var fileInput = document.getElementById('fileInput');
+            var resultElement = document.getElementById('result');
+            var downloadLink = document.getElementById('downloadLink');
+            
+            var file = fileInput.files[0];
+
+            if (file) {
+                var reader = new FileReader();
+
+                reader.onload = function (e) {
+                    var content = e.target.result;
+                    var words = content.split(/\s+/);
+
+                    var { duplicates, nonDuplicates } = findDuplicates(words);
+
+                    if (duplicates.length > 0) {
+                        resultElement.innerHTML = 'Duplicate words found: <br>' + duplicates.join('<br>');
+                    } else {
+                        resultElement.innerHTML = 'No duplicate words found.';
+                    }
+
+                    var nonDuplicateText = nonDuplicates.join('\n');
+                    var blob = new Blob([nonDuplicateText], { type: 'text/plain' });
+                    downloadLink.href = URL.createObjectURL(blob);
+                    downloadLink.style.display = 'block';
+                };
+
+                reader.readAsText(file);
+            } else {
+                resultElement.innerHTML = 'Please choose a file.';
+                downloadLink.style.display = 'none';
+            }
+        }
+
+        function findDuplicates(arr) {
+            var sortedArr = arr.slice().sort();
+            var duplicates = [];
+            var nonDuplicates = [];
+
+            for (var i = 0; i < sortedArr.length - 1; i++) {
+                if (sortedArr[i + 1] == sortedArr[i]) {
+                    if (!duplicates.includes(sortedArr[i])) {
+                        duplicates.push(sortedArr[i]);
+                    }
+                } else {
+                    nonDuplicates.push(sortedArr[i]);
+                }
+            }
+
+            nonDuplicates.push(sortedArr[sortedArr.length - 1]);
+
+            return { duplicates, nonDuplicates };
+        }
+    </script>
+</body>
+</html>
